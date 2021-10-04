@@ -108,7 +108,10 @@ uint8_t buf[256];
 
 static bool strHandler(uint8_t dev_addr,  tusb_control_request_t const* request,  xfer_result_t result)
 {
+printf("strHandler(%d, %p, %.7s)\r\n", dev_addr, request, &("successfailed stalled"[result*7]));
 	dec_hexdump("<String---------------------------", 64, buf);
+printf("!! Why do we never see this ?????????????????????????\r\n");
+buf[0] = 0xBC;
 	return true;
 }
 
@@ -129,14 +132,15 @@ bool  midih_set_config (uint8_t dev_addr,  uint8_t itf_num)
 // 0x0409 (language - UNICODE for english-us)
 // 0x0012 (length)
 printf("##lang#######################################################################\r\n");
+printf("+ callback %p\r\n", strHandler);  
 	//                                               req  getdesc  idx   str     lang      datalen
 	TU_ASSERT( tuh_control_xfer(0,
-	           (tusb_control_request_t*)((uint8_t[]){0x80, 0x06,  0x00,  0x03, 0x00,0x00, 0x00,0x00}),
+	           (tusb_control_request_t*)((uint8_t[]){0x80, 0x06,  0x00,  0x03, 0x00,0x00, 0xFE,0x00}),
 			   buf, strHandler) );  // get language table
-printf("##string#######################################################################\r\n");
-	TU_ASSERT( tuh_control_xfer(0,
-	           (tusb_control_request_t*)((uint8_t[]){0x80, 0x06,  iProd, 0x03, 0x09,0x04, 0x00,0x00}),
-			   buf, strHandler) );  // get product string
+//printf("##string#######################################################################\r\n");
+//	TU_ASSERT( tuh_control_xfer(0,
+//	           (tusb_control_request_t*)((uint8_t[]){0x80, 0x06,  iProd, 0x03, 0x09,0x04, 0x00,0x00}),
+//			   buf, strHandler) );  // get product string
 printf("#########################################################################\r\n");
 
 	return true;
